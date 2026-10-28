@@ -1,7 +1,7 @@
 {
   "name": "proyecto-final-alfredop89",
   "version": "1.0.0",
-  "description": "Entrega del proyecto final para la cursada de Backend con Node.js + Express",
+  "description": "Entrega del proyecto final para la cursada de Backend con Node.js + Express de Talento Tech",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
