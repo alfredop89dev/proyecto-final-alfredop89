@@ -1,3 +1,4 @@
+//Data local temporal hasta que conectemos firebase
 import { products } from "../data/products.js";
 
 

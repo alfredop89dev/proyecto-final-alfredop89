@@ -27,7 +27,7 @@ export const addProduct = async (req, res) => {
     try {
         const product = req.body;
         const newProduct = await productModel.addProduct(product);
-        res.status(201).send(newProduct);
+        res.status(201).send({ message: "Producto agregado correctamente", product: newProduct });
     } catch (error) {
         console.error(error);
         res.status(500).send({ error: "Error interno del servidor" });
@@ -39,7 +39,7 @@ export const updateProduct = async (req, res) => {
         const id = parseInt(req.params.id);
         const updatedProduct = req.body;
         const product = await productModel.updateProduct(id, updatedProduct);
-        res.status(200).send(product);
+        res.status(200).send({ message: "Producto actualizado correctamente", product });
     } catch (error) {
         console.error(error);
         res.status(404).send({ error: error.message });
@@ -50,7 +50,7 @@ export const deleteProduct = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         const deletedProduct = await productModel.deleteProduct(id);
-        res.status(200).send(deletedProduct);
+        res.status(200).send({ message: "Producto eliminado correctamente", product: deletedProduct });
     } catch (error) {
         console.error(error);
         res.status(404).send({ error: error.message });
