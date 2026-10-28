@@ -1,0 +1,27 @@
+{
+  "name": "proyecto-final-alfredop89",
+  "version": "1.0.0",
+  "description": "Entrega del proyecto final para la cursada de Backend con Node.js + Express",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "Alfredo A. Perez M.",
+  "license": "MIT",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.15.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.15.0",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "nodemon": "^3.1.14"
+  }
+}
