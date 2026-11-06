@@ -4,9 +4,11 @@ API REST de productos desarrollada como entrega del proyecto final para la cursa
 
 ## Tecnologías
 
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://nodejs.org/) (18 o superior)
 - [Express 5](https://expressjs.com/)
+- [Firebase / Firestore](https://firebase.google.com/) como base de datos
 - [dotenv](https://www.npmjs.com/package/dotenv)
+- [cors](https://www.npmjs.com/package/cors)
 - [nodemon](https://nodemon.io/) (desarrollo)
 - [pnpm](https://pnpm.io/) como gestor de paquetes
 
@@ -14,6 +16,7 @@ API REST de productos desarrollada como entrega del proyecto final para la cursa
 
 - Node.js 18 o superior
 - pnpm
+- Un proyecto de Firebase con Firestore habilitado
 
 ## Instalación
 
@@ -23,13 +26,28 @@ pnpm install
 
 ## Variables de entorno
 
-Crear un archivo `.env` en la raíz del proyecto:
+Crear un archivo `.env` en la raíz del proyecto (no se versiona). Completa los valores con los datos de tu proyecto de Firebase:
 
 ```env
 BACKEND_URL=http://localhost:3000
+
+API_KEY=tu_api_key
+AUTH_DOMAIN=tu_proyecto.firebaseapp.com
+PROJECT_ID=tu_proyecto
+STORAGE_BUCKET=tu_proyecto.firebasestorage.app
+MESSAGING_SENDER_ID=tu_messaging_sender_id
+APP_ID=tu_app_id
 ```
 
-El puerto del servidor se toma de `BACKEND_URL`. Si la variable no está definida, se usa el puerto `3000` por defecto.
+| Variable | Descripción |
+| --- | --- |
+| `BACKEND_URL` | URL del servidor; de ella se toma el puerto. Si no está definida se usa `3000`. |
+| `API_KEY` | API key del proyecto de Firebase. |
+| `AUTH_DOMAIN` | Dominio de autenticación del proyecto. |
+| `PROJECT_ID` | ID del proyecto de Firebase. |
+| `STORAGE_BUCKET` | Bucket de almacenamiento del proyecto. |
+| `MESSAGING_SENDER_ID` | ID de mensajería del proyecto. |
+| `APP_ID` | ID de la aplicación web. |
 
 ## Ejecución
 
@@ -47,10 +65,10 @@ El servidor queda disponible en `http://localhost:3000`.
 
 ```
 .
-├── index.js                          # Punto de entrada del servidor
+├── index.js                          # Punto de entrada y configuración de Express
 ├── src/
-│   ├── data/
-│   │   └── products.js               # Datos locales de productos (temporal)
+│   ├── config/
+│   │   └── db.js                     # Conexión a Firestore
 │   ├── models/
 │   │   └── products.model.js         # Lógica de acceso a datos
 │   ├── controllers/
@@ -64,26 +82,42 @@ El servidor queda disponible en `http://localhost:3000`.
 
 Base URL: `/api`
 
-| Método | Endpoint          | Descripción                    |
-| ------ | ----------------- | ------------------------------ |
-| GET    | `/`               | Mensaje de bienvenida          |
-| GET    | `/api/products`   | Lista todos los productos      |
-| GET    | `/api/products/:id` | Obtiene un producto por ID   |
-| POST   | `/api/products`   | Crea un nuevo producto         |
-| PUT    | `/api/products/:id` | Actualiza un producto por ID |
-| DELETE | `/api/products/:id` | Elimina un producto por ID   |
+| Método | Endpoint            | Descripción                        |
+| ------ | ------------------- | ---------------------------------- |
+| GET    | `/`                 | Mensaje de bienvenida              |
+| GET    | `/api/products`     | Lista todos los productos          |
+| GET    | `/api/products/:id` | Obtiene un producto por ID         |
+| POST   | `/api/products`     | Crea un nuevo producto             |
+| PUT    | `/api/products/:id` | Actualiza un producto por ID       |
+| DELETE | `/api/products/:id` | Elimina un producto por ID         |
+
+Los productos se almacenan en la colección `products` de Firestore. El `id` es el identificador generado por Firestore (string).
+
+### Campos requeridos
+
+En `POST` y `PUT` son obligatorios `name`, `description` y `price`. Si falta alguno se responde con `400`. `stock` es opcional.
 
 ### Ejemplo de producto
 
 ```json
 {
-  "id": 1,
+  "id": "abc123",
   "name": "Producto 1",
   "description": "Descripción del producto 1",
   "price": 10.99,
   "stock": 100
 }
 ```
+
+### Códigos de respuesta
+
+| Código | Situación |
+| ------ | --------- |
+| `200` | Operación exitosa |
+| `201` | Producto creado |
+| `400` | Faltan campos requeridos o el JSON es inválido |
+| `404` | Producto o ruta no encontrada |
+| `500` | Error interno del servidor |
 
 ### Ejemplos de uso
 
@@ -92,7 +126,7 @@ Base URL: `/api`
 curl http://localhost:3000/api/products
 
 # Obtener un producto por ID
-curl http://localhost:3000/api/products/1
+curl http://localhost:3000/api/products/abc123
 
 # Crear un producto
 curl -X POST http://localhost:3000/api/products \
@@ -100,18 +134,19 @@ curl -X POST http://localhost:3000/api/products \
   -d '{"name":"Producto 4","description":"Nuevo","price":9.99,"stock":25}'
 
 # Actualizar un producto
-curl -X PUT http://localhost:3000/api/products/1 \
+curl -X PUT http://localhost:3000/api/products/abc123 \
   -H "Content-Type: application/json" \
-  -d '{"price":12.99}'
+  -d '{"name":"Producto 4","description":"Actualizado","price":12.99}'
 
 # Eliminar un producto
-curl -X DELETE http://localhost:3000/api/products/1
+curl -X DELETE http://localhost:3000/api/products/abc123
 ```
 
 ## Notas
 
-- Los datos se almacenan en memoria (`src/data/products.js`), por lo que se pierden al reiniciar el servidor.
-- Próximamente se integrará una base de datos (Firebase) en reemplazo de los datos locales.
+- La conexión a Firestore se configura en `src/config/db.js`.
+- Recuerda configurar las reglas de seguridad de Firestore según tu entorno. En desarrollo puede ser necesario permitir el acceso a la colección `products`.
+- El archivo `.env` contiene credenciales y no debe subirse al repositorio.
 
 ## Autor
 

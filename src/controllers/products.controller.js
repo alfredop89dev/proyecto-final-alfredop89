@@ -14,7 +14,7 @@ export const getAllProducts = async (req, res) => {
 //Producto por ID
 export const getProductById = async (req, res) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = req.params.id;
         const product = await productModel.getProductById(id);
         res.status(200).send(product);
     } catch (error) {
@@ -24,6 +24,10 @@ export const getProductById = async (req, res) => {
 };
 //Agregar un producto
 export const addProduct = async (req, res) => {
+    // Validar que el producto tenga los campos requeridos
+    if (!req.body.name || !req.body.description || !req.body.price) {
+        return res.status(400).send({ error: "Faltan campos requeridos" });
+    }
     try {
         const product = req.body;
         const newProduct = await productModel.addProduct(product);
@@ -35,8 +39,12 @@ export const addProduct = async (req, res) => {
 };
 //Actualizar un producto
 export const updateProduct = async (req, res) => {
+    // Validar que el producto tenga los campos requeridos
+    if (!req.body.name || !req.body.description || !req.body.price) {
+        return res.status(400).send({ error: "Faltan campos requeridos" });
+    }
     try {
-        const id = parseInt(req.params.id);
+        const id = req.params.id;
         const updatedProduct = req.body;
         const product = await productModel.updateProduct(id, updatedProduct);
         res.status(200).send({ message: "Producto actualizado correctamente", product });
@@ -48,7 +56,7 @@ export const updateProduct = async (req, res) => {
 //Eliminar un producto
 export const deleteProduct = async (req, res) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = req.params.id;
         const deletedProduct = await productModel.deleteProduct(id);
         res.status(200).send({ message: "Producto eliminado correctamente", product: deletedProduct });
     } catch (error) {
