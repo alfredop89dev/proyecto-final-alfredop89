@@ -73,6 +73,10 @@ El servidor queda disponible en `http://localhost:3000`.
 │   │   └── products.model.js         # Lógica de acceso a datos
 │   ├── controllers/
 │   │   └── products.controller.js    # Controladores de la API
+│   ├── middlewares/
+│   │   ├── products.middleware.js    # Validación de productos
+│   │   ├── notFound.middleware.js    # Manejo de rutas no encontradas
+│   │   └── errorHandler.middleware.js # Manejo global de errores
 │   └── routes/
 │       └── products.route.js         # Definición de rutas
 └── package.json
@@ -95,17 +99,21 @@ Los productos se almacenan en la colección `products` de Firestore. El `id` es 
 
 ### Campos requeridos
 
-En `POST` y `PUT` son obligatorios `name`, `description` y `price`. Si falta alguno se responde con `400`. `stock` es opcional.
+En `POST` todos los campos (`name`, `description`, `price`, `category`, `stock`, `image`) son requeridos. En `PUT` se puede enviar al menos uno de ellos para actualizar. Para `DELETE` solo se pasa el `id` del producto.
+
+No se permite un producto duplicado: si ya existe uno con el mismo `name` y `category`, el `POST` responde con `409`.
 
 ### Ejemplo de producto
 
 ```json
 {
-  "id": "abc123",
+  "id": "id asignado por Firebase",
   "name": "Producto 1",
   "description": "Descripción del producto 1",
   "price": 10.99,
-  "stock": 100
+  "category": "Categoria del producto",
+  "stock": 100,
+  "image": "Url de la imagen del producto"
 }
 ```
 
@@ -115,8 +123,9 @@ En `POST` y `PUT` son obligatorios `name`, `description` y `price`. Si falta alg
 | ------ | --------- |
 | `200` | Operación exitosa |
 | `201` | Producto creado |
-| `400` | Faltan campos requeridos o el JSON es inválido |
+| `400` | Datos inválidos, campos faltantes o JSON mal formado |
 | `404` | Producto o ruta no encontrada |
+| `409` | Ya existe un producto con ese nombre y categoría |
 | `500` | Error interno del servidor |
 
 ### Ejemplos de uso
@@ -131,7 +140,7 @@ curl http://localhost:3000/api/products/abc123
 # Crear un producto
 curl -X POST http://localhost:3000/api/products \
   -H "Content-Type: application/json" \
-  -d '{"name":"Producto 4","description":"Nuevo","price":9.99,"stock":25}'
+  -d '{"name":"Producto 4","description":"Nuevo","price":9.99,"category":"Categoria","stock":25,"image":"https://ejemplo.com/producto4.jpg"}'
 
 # Actualizar un producto
 curl -X PUT http://localhost:3000/api/products/abc123 \

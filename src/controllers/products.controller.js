@@ -2,65 +2,60 @@ import * as productModel from "../models/products.model.js";
 
 
 //Todos los productos
-export const getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res, next) => {
     try {
         const products = await productModel.getAllProducts();
         res.status(200).send(products);
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ error: "Error interno del servidor" });
+        next(error);
     }
 };
 //Producto por ID
-export const getProductById = async (req, res) => {
+export const getProductById = async (req, res, next) => {
     try {
         const id = req.params.id;
         const product = await productModel.getProductById(id);
         res.status(200).send(product);
     } catch (error) {
-        console.error(error);
-        res.status(404).send({ error: error.message });
+        next(error);
     }
 };
 //Agregar un producto
-export const addProduct = async (req, res) => {
-    // Validar que el producto tenga los campos requeridos
-    if (!req.body.name || !req.body.description || !req.body.price) {
-        return res.status(400).send({ error: "Faltan campos requeridos" });
-    }
+export const addProduct = async (req, res, next) => {
     try {
         const product = req.body;
-        const newProduct = await productModel.addProduct(product);
+        const name = product.name.trim();
+        const category = product.category.trim();
+
+        const existing = await productModel.findByNameAndCategory(name, category);
+        if (existing) {
+            return res.status(409).send({ error: "Ya existe un producto con ese nombre en esa categoría" });
+        }
+
+        const newProduct = await productModel.addProduct({ ...product, name, category });
         res.status(201).send({ message: "Producto agregado correctamente", product: newProduct });
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ error: "Error interno del servidor" });
+        next(error);
     }
 };
 //Actualizar un producto
-export const updateProduct = async (req, res) => {
-    // Validar que el producto tenga los campos requeridos
-    if (!req.body.name || !req.body.description || !req.body.price) {
-        return res.status(400).send({ error: "Faltan campos requeridos" });
-    }
+export const updateProduct = async (req, res, next) => {
     try {
         const id = req.params.id;
         const updatedProduct = req.body;
         const product = await productModel.updateProduct(id, updatedProduct);
         res.status(200).send({ message: "Producto actualizado correctamente", product });
     } catch (error) {
-        console.error(error);
-        res.status(404).send({ error: error.message });
+        next(error);
     }
 };
 //Eliminar un producto
-export const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res, next) => {
     try {
         const id = req.params.id;
         const deletedProduct = await productModel.deleteProduct(id);
         res.status(200).send({ message: "Producto eliminado correctamente", product: deletedProduct });
     } catch (error) {
-        console.error(error);
-        res.status(404).send({ error: error.message });
+        next(error);
     }
 };
