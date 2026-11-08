@@ -42,7 +42,20 @@ export const addProduct = async (req, res, next) => {
 export const updateProduct = async (req, res, next) => {
     try {
         const id = req.params.id;
-        const updatedProduct = req.body;
+        const updatedProduct = { ...req.body };
+
+        const current = await productModel.getProductById(id);
+        const name = updatedProduct.name !== undefined ? updatedProduct.name.trim() : current.name;
+        const category = updatedProduct.category !== undefined ? updatedProduct.category.trim() : current.category;
+
+        const existing = await productModel.findByNameAndCategory(name, category);
+        if (existing && existing.id !== id) {
+            return res.status(409).send({ error: "Ya existe un producto con ese nombre en esa categoría" });
+        }
+
+        if (updatedProduct.name !== undefined) updatedProduct.name = name;
+        if (updatedProduct.category !== undefined) updatedProduct.category = category;
+
         const product = await productModel.updateProduct(id, updatedProduct);
         res.status(200).send({ message: "Producto actualizado correctamente", product });
     } catch (error) {

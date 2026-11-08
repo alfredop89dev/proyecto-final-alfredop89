@@ -101,7 +101,11 @@ Los productos se almacenan en la colección `products` de Firestore. El `id` es 
 
 En `POST` todos los campos (`name`, `description`, `price`, `category`, `stock`, `image`) son requeridos. En `PUT` se puede enviar al menos uno de ellos para actualizar. Para `DELETE` solo se pasa el `id` del producto.
 
-No se permite un producto duplicado: si ya existe uno con el mismo `name` y `category`, el `POST` responde con `409`.
+No se permite un producto duplicado: si ya existe otro producto con el mismo `name` y `category`, tanto `POST` como `PUT` responden con `409`.
+
+En `PUT` la validación de duplicados tiene en cuenta los valores efectivos del producto: si solo se envía `name` o solo `category`, se compara contra el valor actual del campo que no vino en el body. Además, el propio producto queda excluido de la comparación, por lo que reenviar sus mismos `name` y `category` no genera un `409`.
+
+Los valores de `name` y `category` se normalizan con `trim()` antes de comparar y guardar, por lo que `"Producto 1"` y `" Producto 1 "` se consideran el mismo valor.
 
 ### Ejemplo de producto
 
@@ -125,7 +129,7 @@ No se permite un producto duplicado: si ya existe uno con el mismo `name` y `cat
 | `201` | Producto creado |
 | `400` | Datos inválidos, campos faltantes o JSON mal formado |
 | `404` | Producto o ruta no encontrada |
-| `409` | Ya existe un producto con ese nombre y categoría |
+| `409` | Ya existe otro producto con ese nombre y categoría (en `POST` o `PUT`) |
 | `500` | Error interno del servidor |
 
 ### Ejemplos de uso
