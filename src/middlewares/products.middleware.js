@@ -3,7 +3,7 @@
 const isPresent = (v) => v !== undefined && v !== null;
 
 export const validateProduct = (req, res, next) => {
-    const { name, description, price, category, stock, image } = req.body;
+    const { name, description, price, category, stock, image } = req.body ?? {};
     const fields = { name, description, price, category, stock, image };
 
     if (Object.values(fields).some((v) => !isPresent(v))) {
@@ -33,7 +33,7 @@ export const validateId = (req, res, next) => {
 };
 
 export const validateProductUpdate = (req, res, next) => {
-    const { name, description, price, category, stock, image } = req.body;
+    const { name, description, price, category, stock, image } = req.body ?? {};
     const fields = { name, description, price, category, stock, image };
 
     if (!Object.values(fields).some(isPresent)) {
